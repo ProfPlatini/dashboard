@@ -332,13 +332,13 @@ function iniciarPainel() {
     canvas.hidden = false; canvas.parentElement.hidden = false; fallback.hidden = true;
     const {
       metrica = "Faturamento (R$)", formatarValor = (valor) => dinheiro.format(valor),
-      horizontal = false, cor = tipo === "line" ? "#67d6c5" : "#ffc66d"
+      horizontal = false, cor = tipo === "line" ? "#DA291C" : "#B77900"
     } = configuracao;
     const dados = {
       labels: grupos.map(([nome]) => formatarRotulo(nome)),
       datasets: [{
         label: metrica, data: grupos.map(([, valor]) => valor),
-        borderColor: cor, backgroundColor: tipo === "line" ? "rgba(103,214,197,.12)" : `${cor}B8`,
+        borderColor: cor, backgroundColor: tipo === "line" ? `${cor}20` : `${cor}B8`,
         borderWidth: 2, pointRadius: tipo === "line" ? 3 : 0, pointHoverRadius: 5,
         pointBackgroundColor: cor, fill: tipo === "line", tension: .32, borderRadius: tipo === "bar" ? 3 : 0,
         maxBarThickness: 48
@@ -349,16 +349,16 @@ function iniciarPainel() {
       indexAxis: horizontal ? "y" : "x",
       interaction: { intersect: false, mode: "index" },
       plugins: {
-        legend: { display: true, position: "top", align: "end", labels: { boxWidth: 8, boxHeight: 8, usePointStyle: true, pointStyle: "circle", color: "#9ca9a4", font: { family: "Space Mono", size: 9 } } },
+        legend: { display: true, position: "top", align: "end", labels: { boxWidth: 8, boxHeight: 8, usePointStyle: true, pointStyle: "circle", color: "#656565", font: { family: "Space Mono", size: 9 } } },
         tooltip: { callbacks: { label: (contexto) => ` ${metrica}: ${formatarValor(contexto.parsed[horizontal ? "x" : "y"] ?? contexto.parsed)}` } }
       },
       scales: {
         x: horizontal
-          ? { beginAtZero: true, grid: { color: "rgba(120,145,135,.16)" }, ticks: { color: "#9ca9a4", font: { family: "Space Mono", size: 8 }, callback: (valor) => formatarValor(valor) }, border: { display: false }, title: { display: true, text: metrica, color: "#9ca9a4", font: { family: "Space Mono", size: 8 } } }
-          : { grid: { display: false }, ticks: { color: "#a9b8ae", font: { family: "Space Mono", size: 8 } }, border: { display: false } },
+          ? { beginAtZero: true, grid: { color: "rgba(38,38,38,.08)" }, ticks: { color: "#656565", font: { family: "Space Mono", size: 8 }, callback: (valor) => formatarValor(valor) }, border: { display: false }, title: { display: true, text: metrica, color: "#656565", font: { family: "Space Mono", size: 8 } } }
+          : { grid: { display: false }, ticks: { color: "#514d47", font: { family: "Space Mono", size: 8 } }, border: { display: false } },
         y: horizontal
-          ? { grid: { display: false }, ticks: { color: "#a9b8ae", font: { family: "Space Mono", size: 8 } }, border: { display: false } }
-          : { beginAtZero: true, grid: { color: "rgba(120,145,135,.16)" }, ticks: { color: "#9ca9a4", font: { family: "Space Mono", size: 8 }, callback: (valor) => formatarValor(valor) }, border: { display: false }, title: { display: true, text: metrica, color: "#9ca9a4", font: { family: "Space Mono", size: 8 } } }
+          ? { grid: { display: false }, ticks: { color: "#514d47", font: { family: "Space Mono", size: 8 } }, border: { display: false } }
+          : { beginAtZero: true, grid: { color: "rgba(38,38,38,.08)" }, ticks: { color: "#656565", font: { family: "Space Mono", size: 8 }, callback: (valor) => formatarValor(valor) }, border: { display: false }, title: { display: true, text: metrica, color: "#656565", font: { family: "Space Mono", size: 8 } } }
       }
     };
     if (estado.graficos[chave]) {
@@ -382,12 +382,12 @@ function iniciarPainel() {
   }
 
   function atualizarGraficos(linhas) {
-    atualizarGrafico("monthly-chart", "line", agrupar(linhas, "mes"), formatarMes, { cor: "#67d6c5" });
-    atualizarGrafico("category-chart", "bar", agrupar(linhas, "categoria"), (valor) => valor, { cor: "#ffc66d" });
+    atualizarGrafico("monthly-chart", "line", agrupar(linhas, "mes"), formatarMes, { cor: "#DA291C" });
+    atualizarGrafico("category-chart", "bar", agrupar(linhas, "categoria"), (valor) => valor, { cor: "#B77900" });
     if (!estado.base.hasRegion) {
       informarGraficoIndisponivel("region-chart", "Esta base não contém a coluna regiao. O gráfico será exibido ao importar dados com essa coluna.");
     } else {
-      atualizarGrafico("region-chart", "bar", agrupar(linhas, "regiao"), (valor) => valor, { cor: "#80b9fa" });
+      atualizarGrafico("region-chart", "bar", agrupar(linhas, "regiao"), (valor) => valor, { cor: "#536577" });
       const semRegiao = linhas.filter((linha) => !linha.regiao).length;
       const fallback = elemento("region-fallback");
       if (semRegiao) fallback.textContent = `${inteiro.format(semRegiao)} registro(s) sem região não aparecem neste gráfico.`;
@@ -395,14 +395,14 @@ function iniciarPainel() {
     }
 
     const produtos = agrupar(linhas, "produto").sort((a, b) => b[1] - a[1]).slice(0, 10);
-    atualizarGrafico("product-chart", "bar", produtos, (valor) => valor, { horizontal: true, cor: "#a0d880" });
+    atualizarGrafico("product-chart", "bar", produtos, (valor) => valor, { horizontal: true, cor: "#A83B32" });
     const formatoUnidades = (valor) => inteiro.format(valor);
     atualizarGrafico("units-category-chart", "bar", agrupar(linhas, "categoria", "quantidade"), (valor) => valor, {
-      metrica: "Unidades vendidas", formatarValor: formatoUnidades, cor: "#67d6c5"
+      metrica: "Unidades vendidas", formatarValor: formatoUnidades, cor: "#DA291C"
     });
 
     if (colunaDisponivel("canal")) {
-      atualizarGrafico("channel-chart", "bar", agrupar(linhas, "canal"), (valor) => valor, { horizontal: true, cor: "#80b9fa" });
+      atualizarGrafico("channel-chart", "bar", agrupar(linhas, "canal"), (valor) => valor, { horizontal: true, cor: "#536577" });
       const semCanal = linhas.filter((linha) => !obterCampoOpcional(linha, "canal")).length;
       const fallback = elemento("channel-fallback");
       if (semCanal) fallback.textContent = `${inteiro.format(semCanal)} registro(s) sem canal não aparecem neste gráfico.`;
@@ -410,7 +410,7 @@ function iniciarPainel() {
     } else informarGraficoIndisponivel("channel-chart", "Esta base não contém a coluna canal.");
 
     if (colunaDisponivel("forma_pagamento")) {
-      atualizarGrafico("payment-chart", "bar", agrupar(linhas, "forma_pagamento"), (valor) => valor, { horizontal: true, cor: "#ffc66d" });
+      atualizarGrafico("payment-chart", "bar", agrupar(linhas, "forma_pagamento"), (valor) => valor, { horizontal: true, cor: "#B77900" });
       const semPagamento = linhas.filter((linha) => !obterCampoOpcional(linha, "forma_pagamento")).length;
       const fallback = elemento("payment-fallback");
       if (semPagamento) fallback.textContent = `${inteiro.format(semPagamento)} registro(s) sem forma de pagamento não aparecem neste gráfico.`;
