@@ -1,0 +1,184 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#0b1016">
+  <title>Platini Consultor | Painel de vendas</title>
+  <link rel="stylesheet" href="styles.css">
+  <script defer src="https://cdn.jsdelivr.net/npm/chart.js@4.4.3/dist/chart.umd.min.js"></script>
+  <script defer src="https://cdn.jsdelivr.net/npm/papaparse@5.4.1/papaparse.min.js"></script>
+  <script defer src="script.js"></script>
+</head>
+<body>
+  <main class="page-shell">
+    <header class="topbar">
+      <a class="brand" href="#inicio" aria-label="Painel de vendas, início">
+        <span class="brand-mark" aria-hidden="true">PC</span>
+        <span>Platini Consultor <span class="brand-divider">/</span> Vendas</span>
+      </a>
+      <span class="course-tag">FUNDAMENTOS DE IA E ANÁLISE DE DADOS</span>
+    </header>
+
+    <section class="intro" id="inicio" aria-labelledby="page-title">
+      <div>
+        <p class="eyebrow">PLATINI CONSULTOR <span class="eyebrow-divider">//</span> PAINEL EXPLORATÓRIO</p>
+        <h1 id="page-title">Análise de vendas</h1>
+        <p class="intro-copy">Acompanhe a evolução das vendas e compare categorias, produtos e canais.</p>
+      </div>
+      <div class="data-status" id="data-status" role="status" aria-live="polite">
+        <span class="status-dot" aria-hidden="true"></span>
+        <span id="data-status-text">Carregando dados de demonstração…</span>
+      </div>
+    </section>
+
+    <section class="panel filters-panel" aria-labelledby="filters-title">
+      <div class="section-heading filter-heading">
+        <div>
+          <p class="eyebrow">EXPLORE OS DADOS</p>
+          <h2 id="filters-title">Filtros</h2>
+        </div>
+        <button class="button button-quiet" id="clear-filters" type="button">Limpar filtros</button>
+      </div>
+      <div class="filter-grid">
+        <label class="field" for="date-from">
+          <span>Data inicial</span>
+          <input id="date-from" type="date">
+        </label>
+        <label class="field" for="date-to">
+          <span>Data final</span>
+          <input id="date-to" type="date">
+        </label>
+        <label class="field" for="category-filter">
+          <span>Categoria</span>
+          <select id="category-filter"><option value="">Todas as categorias</option></select>
+        </label>
+        <label class="field" for="region-filter">
+          <span>Região</span>
+          <select id="region-filter"><option value="">Todas as regiões</option></select>
+        </label>
+      </div>
+      <p class="filter-note" id="region-filter-note"></p>
+    </section>
+
+    <section class="metrics-grid" aria-label="Indicadores das vendas filtradas">
+      <article class="metric-card metric-primary">
+        <div class="metric-top"><span>Faturamento total</span><span class="metric-icon" aria-hidden="true">R$</span></div>
+        <p class="metric-value" id="metric-revenue">—</p>
+        <p class="metric-foot">Soma do faturamento das linhas</p>
+      </article>
+      <article class="metric-card">
+        <div class="metric-top"><span>Quantidade de vendas</span><span class="metric-icon icon-blue" aria-hidden="true">↗</span></div>
+        <p class="metric-value" id="metric-sales">—</p>
+        <p class="metric-foot">IDs de venda únicos</p>
+      </article>
+      <article class="metric-card">
+        <div class="metric-top"><span>Unidades vendidas</span><span class="metric-icon icon-green" aria-hidden="true">▦</span></div>
+        <p class="metric-value" id="metric-units">—</p>
+        <p class="metric-foot">Soma das quantidades</p>
+      </article>
+      <article class="metric-card">
+        <div class="metric-top"><span>Ticket médio</span><span class="metric-icon icon-blue" aria-hidden="true">◉</span></div>
+        <p class="metric-value" id="metric-average">—</p>
+        <p class="metric-foot">Faturamento ÷ vendas únicas</p>
+      </article>
+    </section>
+
+    <div class="results-line" aria-live="polite">
+      <p id="record-count">Carregando registros…</p>
+      <p class="validation-summary" id="validation-summary"></p>
+    </div>
+
+    <section class="charts-grid" aria-label="Gráficos de vendas">
+      <article class="panel chart-panel chart-wide">
+        <div class="section-heading chart-heading">
+          <div><p class="eyebrow">EVOLUÇÃO</p><h2>Faturamento mensal</h2></div>
+          <span class="unit-label">Valores em R$</span>
+        </div>
+        <div class="chart-wrap"><canvas id="monthly-chart" role="img" aria-label="Gráfico de linhas do faturamento mensal"></canvas></div>
+        <p class="chart-fallback" id="monthly-fallback" hidden></p>
+      </article>
+      <article class="panel chart-panel">
+        <div class="section-heading chart-heading">
+          <div><p class="eyebrow">COMPARAÇÃO</p><h2>Por categoria</h2></div>
+          <span class="unit-label">Valores em R$</span>
+        </div>
+        <div class="chart-wrap"><canvas id="category-chart" role="img" aria-label="Gráfico de barras do faturamento por categoria"></canvas></div>
+        <p class="chart-fallback" id="category-fallback" hidden></p>
+      </article>
+      <article class="panel chart-panel">
+        <div class="section-heading chart-heading">
+          <div><p class="eyebrow">COMPARAÇÃO</p><h2>Por região</h2></div>
+          <span class="unit-label">Valores em R$</span>
+        </div>
+        <div class="chart-wrap"><canvas id="region-chart" role="img" aria-label="Gráfico de barras do faturamento por região"></canvas></div>
+        <p class="chart-fallback" id="region-fallback" hidden></p>
+      </article>
+      <article class="panel chart-panel">
+        <div class="section-heading chart-heading">
+          <div><p class="eyebrow">DESTAQUES</p><h2>Produtos por faturamento</h2></div>
+          <span class="unit-label">Valores em R$</span>
+        </div>
+        <div class="chart-wrap"><canvas id="product-chart" role="img" aria-label="Gráfico de barras horizontais do faturamento por produto"></canvas></div>
+        <p class="chart-fallback" id="product-fallback" hidden></p>
+      </article>
+      <article class="panel chart-panel">
+        <div class="section-heading chart-heading">
+          <div><p class="eyebrow">VOLUME</p><h2>Unidades por categoria</h2></div>
+          <span class="unit-label">Unidades</span>
+        </div>
+        <div class="chart-wrap"><canvas id="units-category-chart" role="img" aria-label="Gráfico de barras de unidades vendidas por categoria"></canvas></div>
+        <p class="chart-fallback" id="units-category-fallback" hidden></p>
+      </article>
+      <article class="panel chart-panel">
+        <div class="section-heading chart-heading">
+          <div><p class="eyebrow">CANAIS</p><h2>Faturamento por canal</h2></div>
+          <span class="unit-label">Valores em R$</span>
+        </div>
+        <div class="chart-wrap"><canvas id="channel-chart" role="img" aria-label="Gráfico de barras do faturamento por canal de venda"></canvas></div>
+        <p class="chart-fallback" id="channel-fallback" hidden></p>
+      </article>
+      <article class="panel chart-panel">
+        <div class="section-heading chart-heading">
+          <div><p class="eyebrow">PAGAMENTOS</p><h2>Faturamento por forma de pagamento</h2></div>
+          <span class="unit-label">Valores em R$</span>
+        </div>
+        <div class="chart-wrap"><canvas id="payment-chart" role="img" aria-label="Gráfico de barras do faturamento por forma de pagamento"></canvas></div>
+        <p class="chart-fallback" id="payment-fallback" hidden></p>
+      </article>
+    </section>
+
+    <section class="panel table-panel" aria-labelledby="table-title">
+      <div class="section-heading table-heading">
+        <div><p class="eyebrow">DETALHAMENTO</p><h2 id="table-title">Registros de venda</h2></div>
+        <div class="table-actions">
+          <label class="search-field" for="table-search"><span class="sr-only">Pesquisar nos registros</span>
+            <span aria-hidden="true">⌕</span><input id="table-search" type="search" placeholder="Pesquisar registros…" autocomplete="off">
+          </label>
+          <button class="button button-outline" id="import-button" type="button">Importar CSV</button>
+          <button class="button button-primary" id="export-button" type="button">Exportar CSV</button>
+          <input id="csv-file" type="file" accept=".csv,text/csv" hidden>
+        </div>
+      </div>
+      <div class="table-scroll" tabindex="0" aria-label="Tabela de registros, role para ver mais colunas">
+        <table>
+          <thead id="table-head"></thead>
+          <tbody id="table-body"></tbody>
+        </table>
+      </div>
+      <div class="empty-state" id="empty-state" hidden>
+        <span class="empty-mark" aria-hidden="true">⌕</span>
+        <h3>Nenhum registro encontrado</h3>
+        <p>Ajuste os filtros ou a pesquisa para ver os resultados.</p>
+      </div>
+      <p class="table-hint" id="table-hint">Selecione o nome de uma coluna para ordenar a tabela.</p>
+    </section>
+
+    <footer class="page-footer">
+      <span>Platini Consultor <span class="brand-divider">/</span> Dados que contam histórias.</span>
+      <span>Os dados permanecem no seu navegador.</span>
+    </footer>
+    <div class="toast" id="toast" role="status" aria-live="polite" hidden></div>
+  </main>
+</body>
+</html>
